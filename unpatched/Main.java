@@ -50,10 +50,21 @@ public class Main {
         loadLibUnpatched();
 
         Thread thread = new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {}
-            System.loadLibrary("My_lib");
+            while (true) {
+                try {
+                    Thread.sleep(100);
+                    Path libraryPath = Files.createTempFile("temp", "my_lib.so");
+                    libraryPath.toFile().deleteOnExit();
+
+                    InputStream in = new FileInputStream("libMy_lib.so");
+                    assert in != null;
+                    Files.copy(in, libraryPath, StandardCopyOption.REPLACE_EXISTING);
+
+                    System.load(libraryPath.toString());
+                    libraryPath.toFile().delete();
+                } catch (Exception e) {
+                }
+            }
         });
         thread.start();
         execute();
