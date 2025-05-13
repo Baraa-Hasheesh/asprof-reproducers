@@ -1,0 +1,3 @@
+#!/bin/bash
+
+LD_LIBRARY_PATH=${PATH_TO_ASYNC_PROFILER_LIB_DIR} LD_PRELOAD=${PATH_TO_ASYNC_PROFILER_LIB_DIR}/libasyncProfiler.so ./main.o
