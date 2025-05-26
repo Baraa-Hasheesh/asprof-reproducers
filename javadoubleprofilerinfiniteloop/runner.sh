@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 if ! [[ $1 == "single" ]] && ! [[ $1 == "multi" ]]; then
     echo "Usage: $0 [single|multi]"
     exit 1
 fi
 
-java -Djava.library.path="$(pwd)" -cp async-profiler.jar DoubleProfiler.java DoubleProfiler/run &
+java -Djava.library.path="$(pwd)" -cp async-profiler.jar DoubleProfiler.java DoubleProfiler &
 
 JAVA_PID=$!
 echo "Java PID: ${JAVA_PID}"
