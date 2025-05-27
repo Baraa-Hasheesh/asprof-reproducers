@@ -1,0 +1,46 @@
+diff --git a/Makefile b/Makefile
+index 37a3f23..8b55d58 100644
+--- a/Makefile
++++ b/Makefile
+@@ -35,8 +35,8 @@ endif
+ 
+ CFLAGS_EXTRA ?=
+ CXXFLAGS_EXTRA ?=
+-CFLAGS=-O3 -fno-exceptions $(CFLAGS_EXTRA)
+-CXXFLAGS=-O3 -fno-exceptions -fno-omit-frame-pointer -fvisibility=hidden -std=c++11 $(CXXFLAGS_EXTRA)
++CFLAGS=-g -fno-exceptions $(CFLAGS_EXTRA)
++CXXFLAGS=-g -fno-exceptions -fno-omit-frame-pointer -fvisibility=hidden -std=c++11 $(CXXFLAGS_EXTRA)
+ CPPFLAGS=
+ DEFS=-DPROFILER_VERSION=\"$(PROFILER_VERSION)\"
+ INCLUDES=-I$(JAVA_HOME)/include -Isrc/helper
+diff --git a/src/lockTracer.cpp b/src/lockTracer.cpp
+index d52e88d..79732a7 100644
+--- a/src/lockTracer.cpp
++++ b/src/lockTracer.cpp
+@@ -6,6 +6,9 @@
+ #include <pthread.h>
+ #include <string.h>
+ #include "lockTracer.h"
++
++#include <iostream>
++
+ #include "incbin.h"
+ #include "profiler.h"
+ #include "tsc.h"
+@@ -58,6 +61,8 @@ Error LockTracer::start(Arguments& args) {
+     jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_MONITOR_CONTENDED_ENTERED, NULL);
+     _start_time = TSC::ticks();
+ 
++    fprintf(stderr, "TI=%p, ENV=%p\n", jvmti, env);
++
+     // Intercept Unsafe.park() for tracing contended ReentrantLocks
+     setUnsafeParkEntry(env, UnsafeParkHook);
+ 
+@@ -200,6 +205,7 @@ jint JNICALL LockTracer::RegisterNativesHook(JNIEnv* env, jclass cls, const JNIN
+ }
+ 
+ void JNICALL LockTracer::UnsafeParkHook(JNIEnv* env, jobject instance, jboolean isAbsolute, jlong time) {
++    std::cerr << "INSIDE LockTracer::UnsafeParkHook" << std::endl;
+     while (_enabled) {
+         jvmtiEnv* jvmti = VM::jvmti();
+         jobject park_blocker = getParkBlocker(jvmti, env);
